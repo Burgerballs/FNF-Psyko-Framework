@@ -1,5 +1,9 @@
 package debug;
 
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
+import openfl.display.Sprite;
+import openfl.geom.Rectangle;
 import flixel.FlxG;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
@@ -9,7 +13,7 @@ import openfl.system.System;
 	The FPS class provides an easy-to-use monitor to display
 	the current frame rate of an OpenFL project
 **/
-class FPSCounter extends TextField
+class FPSCounter extends Sprite
 {
 	/**
 		The current frame rate, expressed using frames-per-second
@@ -21,6 +25,9 @@ class FPSCounter extends TextField
 	**/
 	public var memoryMegas(get, never):Float;
 
+	public var text:TextField;
+	public var bg:Bitmap;
+
 	@:noCompletion private var times:Array<Float>;
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
@@ -30,13 +37,20 @@ class FPSCounter extends TextField
 		this.x = x;
 		this.y = y;
 
+		bg = new Bitmap(new BitmapData(1, 1, true, 0x61000000));
+		addChild(bg);
+
+		text = new TextField();
+		text.selectable = false;
+		text.mouseEnabled = false;
+		text.defaultTextFormat = new TextFormat("_sans", 12, color);
+		text.autoSize = LEFT;
+		text.multiline = true;
+		text.text = "FPS: ";
+		addChild(text);
+
 		currentFPS = 0;
-		selectable = false;
-		mouseEnabled = false;
-		defaultTextFormat = new TextFormat("_sans", 14, color);
-		autoSize = LEFT;
-		multiline = true;
-		text = "FPS: ";
+
 
 		times = [];
 	}
@@ -55,18 +69,19 @@ class FPSCounter extends TextField
 			return;
 		}
 
-		currentFPS = times.length < FlxG.updateFramerate ? times.length : FlxG.updateFramerate;		
+		currentFPS = times.length;		
 		updateText();
+		bg.width = text.width + 2;
+		bg.height = text.height;
 		deltaTimeout = 0.0;
 	}
 
 	public dynamic function updateText():Void { // so people can override it in hscript
-		text = 'FPS: ${currentFPS}'
-		+ '\nMemory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
+		text.text = 'FPS: ${currentFPS} • Memory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
 
-		textColor = 0xFFFFFFFF;
+		text.textColor = 0xFFFFFFFF;
 		if (currentFPS < FlxG.drawFramerate * 0.5)
-			textColor = 0xFFFF0000;
+			text.textColor = 0xFFFF0000;
 	}
 
 	inline function get_memoryMegas():Float
