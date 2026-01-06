@@ -3,7 +3,6 @@ package states.editors;
 import backend.StageData;
 import backend.PsychCamera;
 import objects.Character;
-import psychlua.LuaUtils;
 
 import flixel.FlxObject;
 import flixel.addons.display.FlxBackdrop;
@@ -20,7 +19,7 @@ import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 
-import psychlua.ModchartSprite;
+import objects.AnimOffsetSprite;
 import flash.net.FileFilter;
 
 import states.editors.content.Prompt;
@@ -352,7 +351,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			var spr = stageSprites[selected];
 			if(spr == null || StageData.reservedNames.contains(spr.type)) return;
 
-			var copiedSpr = new ModchartSprite();
+			var copiedSpr = new AnimOffsetSprite();
 			var copiedMeta:StageEditorMetaSprite = new StageEditorMetaSprite(null, copiedSpr);
 			for (field in Reflect.fields(spr))
 			{
@@ -524,7 +523,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 		btnY += 50;
 		var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Solid Color', function() {
-			var meta:StageEditorMetaSprite = new StageEditorMetaSprite({type: 'square', scale: [200, 200], name: findUnoccupiedName()}, new ModchartSprite());
+			var meta:StageEditorMetaSprite = new StageEditorMetaSprite({type: 'square', scale: [200, 200], name: findUnoccupiedName()}, new AnimOffsetSprite());
 			meta.sprite.makeGraphic(1, 1, FlxColor.WHITE);
 			meta.sprite.scale.set(200, 200);
 			meta.sprite.updateHitbox();
@@ -1689,7 +1688,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 					_file = null;
 					return;
 				}
-				insertMeta(new StageEditorMetaSprite({type: _makeNewSprite, name: findUnoccupiedName()}, new ModchartSprite()));
+				insertMeta(new StageEditorMetaSprite({type: _makeNewSprite, name: findUnoccupiedName()}, new AnimOffsetSprite()));
 			}
 			var selected = getSelected();
 			tryLoadImage(selected, imageToLoad);
@@ -2115,7 +2114,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate {
 				if(animationInputText.text == anim.anim)
 				{
 					lastOffsets = anim.offsets;
-					cast (target.sprite, ModchartSprite).animOffsets.remove(animationInputText.text);
+					cast (target.sprite, AnimOffsetSprite).animOffsets.remove(animationInputText.text);
 					target.sprite.animation.remove(animationInputText.text);
 					target.animations.remove(anim);
 				}
@@ -2149,7 +2148,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate {
 			{
 				if(animationInputText.text == anim.anim)
 				{
-					var targetSprite:ModchartSprite = cast (target.sprite, ModchartSprite);
+					var targetSprite:AnimOffsetSprite = cast (target.sprite, AnimOffsetSprite);
 					var resetAnim:Bool = false;
 					if(targetSprite.animation.curAnim != null && anim.anim == targetSprite.animation.curAnim.name) resetAnim = true;
 
@@ -2200,7 +2199,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate {
 		for (text in animsTxtGroup)
 			text.kill();
 
-		var spr:ModchartSprite = cast (target.sprite, ModchartSprite);
+		var spr:AnimOffsetSprite = cast (target.sprite, AnimOffsetSprite);
 		if(target.animations.length > 0)
 		{
 			if(target.firstAnimation == null || !target.sprite.animation.exists(target.firstAnimation))
@@ -2254,7 +2253,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate {
 
 	function playAnim(name:String, force:Bool = false)
 	{
-		var spr:ModchartSprite = cast (target.sprite, ModchartSprite);
+		var spr:AnimOffsetSprite = cast (target.sprite, AnimOffsetSprite);
 		spr.playAnim(name, force);
 		if(!spr.animOffsets.exists(name)) spr.updateHitbox();
 	}
@@ -2300,7 +2299,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate {
 		// OFFSET
 		if(target.sprite.animation.curAnim != null)
 		{
-			var spr:ModchartSprite = cast (target.sprite, ModchartSprite);
+			var spr:AnimOffsetSprite = cast (target.sprite, AnimOffsetSprite);
 			var anim:String = spr.animation.curAnim.name;
 			var changedOffset = false;
 			var moveKeysP = [FlxG.keys.justPressed.LEFT, FlxG.keys.justPressed.RIGHT, FlxG.keys.justPressed.UP, FlxG.keys.justPressed.DOWN];

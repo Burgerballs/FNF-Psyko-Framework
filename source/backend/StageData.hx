@@ -2,8 +2,8 @@ package backend;
 
 import openfl.utils.Assets;
 import haxe.Json;
+import objects.AnimOffsetSprite;
 import backend.Song;
-import psychlua.ModchartSprite;
 
 typedef StageFile = {
 	var directory:String;
@@ -149,7 +149,7 @@ class StageData {
 				case 'square', 'sprite', 'animatedSprite':
 					if(!ignoreFilters && !validateVisibility(data.filters)) continue;
 
-					var spr:ModchartSprite = new ModchartSprite(data.x, data.y);
+					var spr:AnimOffsetSprite = new AnimOffsetSprite(data.x, data.y);
 					spr.ID = num;
 					if(data.type != 'square')
 					{
