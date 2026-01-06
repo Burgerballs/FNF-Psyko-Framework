@@ -14,10 +14,10 @@ class BaseHUD extends FlxSpriteGroup {
     public function get_ratingFC() { return PlayState.instance.ratingFC; }
 
     public var curBeat(get, never):Int;
-    public function get_curBeat() { return Conductor.curBeat; }
+    public function get_curBeat() { return game.curBeat; }
 
     public var curStep(get, never):Int;
-    public function get_curStep() { return Conductor.curStep; }
+    public function get_curStep() { return game.curStep; }
 
     override function update(elapsed:Float) {
         super.update(elapsed);

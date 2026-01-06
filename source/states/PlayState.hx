@@ -179,14 +179,14 @@ class PlayState extends MusicBeatState
 
 	public var healthBar:Bar;
 	public var timeBar:Bar;
-	var songPercent:Float = 0;
+	public var songPercent:Float = 0;
 
 	public var ratingsData:Array<Rating> = Rating.loadDefault();
 
 	private var generatedMusic:Bool = false;
 	public var endingSong:Bool = false;
 	public var startingSong:Bool = false;
-	private var updateTime:Bool = true;
+	public var updateTime:Bool = true;
 	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
 
@@ -230,7 +230,7 @@ class PlayState extends MusicBeatState
 
 	public var inCutscene:Bool = false;
 	public var skipCountdown:Bool = false;
-	var songLength:Float = 0;
+	public var songLength:Float = 0;
 
 	public var boyfriendCameraOffset:Array<Float> = null;
 	public var opponentCameraOffset:Array<Float> = null;
@@ -479,7 +479,6 @@ class PlayState extends MusicBeatState
 		add(uiGroup);
 		add(noteGroup);
 
-		// Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
 		// var showTime:Bool = (ClientPrefs.data.timeBarType != 'Disabled');
 		// timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
 		// timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -544,7 +543,7 @@ class PlayState extends MusicBeatState
 		// if(ClientPrefs.data.downScroll)
 		// 	botplayTxt.y = healthBar.y + 70;
 
-		hud = new GenericHUD();
+		hud = new PsychHUD();
 		add(hud);
 		hud.cameras = [camHUD];
 		uiGroup.cameras = [camHUD];
@@ -1127,17 +1126,7 @@ class PlayState extends MusicBeatState
 
 	public dynamic function updateScoreText()
 	{
-		// var str:String = Language.getPhrase('rating_$ratingName', ratingName);
-		// if(totalPlayed != 0)
-		// {
-		// 	var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 2);
-		// 	str += ' (${percent}%) - ' + Language.getPhrase(ratingFC);
-		// }
-
-		// var tempScore:String;
-		// if(!instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [songScore, songMisses, str]);
-		// else tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [songScore, str]);
-		// scoreTxt.text = tempScore;
+		hud.updateScore();
 	}
 
 	public dynamic function fullComboFunction()
@@ -1717,20 +1706,6 @@ class PlayState extends MusicBeatState
 				startSong();
 			else if(!startedCountdown)
 				Conductor.songPosition = -Conductor.crochet * 5 + Conductor.offset;
-		}
-		else if (!paused && updateTime)
-		{
-			// var curTime:Float = Math.max(0, Conductor.songPosition - ClientPrefs.data.noteOffset);
-			// songPercent = (curTime / songLength);
-
-			// var songCalc:Float = (songLength - curTime);
-			// if(ClientPrefs.data.timeBarType == 'Time Elapsed') songCalc = curTime;
-
-			// var secondsTotal:Int = Math.floor(songCalc / 1000);
-			// if(secondsTotal < 0) secondsTotal = 0;
-
-			// if(ClientPrefs.data.timeBarType != 'Song Name')
-			// 	timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
 		}
 
 		if (camZooming)
@@ -3162,12 +3137,6 @@ class PlayState extends MusicBeatState
 
 		if (generatedMusic)
 			notes.sort(FlxSort.byY, ClientPrefs.data.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
-
-		iconP1.scale.set(1.2, 1.2);
-		iconP2.scale.set(1.2, 1.2);
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
 
 		characterBopper(curBeat);
 
