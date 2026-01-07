@@ -2,20 +2,37 @@ package objects.huds;
 
 import flixel.util.FlxStringUtil;
 
-class PsychHUD extends GenericHUD {
+class SignatureHUD extends GenericHUD {
     public var scoreTxt:FlxText;
+    public var accuracyTxt:FlxText;
+    public var extraTxt:FlxText;
     public var timeTxt:FlxText;
     public var timeBar:Bar;
     public var songPercent:Float = 0;
 
     public override function new() {
         super();
-        scoreTxt = new FlxText(0, healthBar.y + 40, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+        scoreTxt = new FlxText(healthBar.x - 4, healthBar.y + 24, healthBar.width, "", 20);
+		scoreTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		add(scoreTxt);
+
+        accuracyTxt = new FlxText(-8, 8, FlxG.width, "100%", 20);
+		accuracyTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		accuracyTxt.scrollFactor.set();
+		accuracyTxt.borderSize = 1.25;
+		accuracyTxt.visible = !ClientPrefs.data.hideHud;
+		add(accuracyTxt);
+
+        extraTxt = new FlxText(-8, 8 + 34, FlxG.width, "Misses: 0\nRank: SS++++\nFlag: SFC", 20);
+		extraTxt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		extraTxt.scrollFactor.set();
+		extraTxt.borderSize = 1.25;
+		extraTxt.visible = !ClientPrefs.data.hideHud;
+		add(extraTxt);
+
 		var showTime:Bool = (ClientPrefs.data.timeBarType != 'Disabled');
 		timeTxt = new FlxText(42 + (FlxG.width / 2) - 248, 19, 400, "", 32);
 		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -61,16 +78,17 @@ class PsychHUD extends GenericHUD {
     }
 
     public override function updateScore() {
-        var str:String = Language.getPhrase('rating_$ratingName', ratingName);
-		if(game.stats.hitPoints != 0)
+		if (game.stats.hitPoints != 0)
 		{
 			var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 3);
-			str += ' (${percent}%) - ' + Language.getPhrase(ratingFC);
-		}
 
-		var tempScore:String;
-		if(!game.instakillOnMiss) tempScore = Language.getPhrase('score_text', 'Score: {1} | Misses: {2} | Rating: {3}', [game.songScore, game.songMisses, str]);
-		else tempScore = Language.getPhrase('score_text_instakill', 'Score: {1} | Rating: {2}', [game.songScore, str]);
-		scoreTxt.text = tempScore;
+			accuracyTxt.text = '${percent}%';
+            extraTxt.text = 'Misses: ${game.songMisses}\nRank: [${ratingFC} | ${ratingName}]\nNPS: [${game.nps} / ${game.stats.data.maxNPS}]';
+		} else {
+            accuracyTxt.text = '';
+            extraTxt.text = '';
+        }
+
+		scoreTxt.text = 'Score: ' + game.songScore;
     }
 }

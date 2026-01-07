@@ -164,6 +164,10 @@ class PlayState extends MusicBeatState
 	public var playerStrums:FlxTypedGroup<StrumNote> = new FlxTypedGroup<StrumNote>();
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash> = new FlxTypedGroup<NoteSplash>();
 
+	public var npsArr:Array<Float> = [];
+	public var nps:Float = 0;
+	public var prevNPS:Float = 0;
+
 	public var camZooming:Bool = false;
 	public var camZoomingMult:Float = 1;
 	public var camZoomingDecay:Float = 1;
@@ -522,7 +526,7 @@ class PlayState extends MusicBeatState
 		// if(ClientPrefs.data.downScroll)
 		// 	botplayTxt.y = healthBar.y + 70;
 
-		hud = new PsychHUD();
+		hud = new SignatureHUD();
 		add(hud);
 		hud.cameras = [camHUD];
 		uiGroup.cameras = [camHUD];
@@ -1683,6 +1687,19 @@ class PlayState extends MusicBeatState
 			}
 		}
 		#end
+		for (i in npsArr) {
+			if (i + 2000 < Conductor.songPosition) {
+				npsArr.remove(i);
+			}
+		}
+		
+		nps = (npsArr.length) / 2.0;
+		if (nps > stats.data.maxNPS)
+			stats.data.maxNPS = nps;
+		if (nps != prevNPS) {
+			hud.updateScore();
+			prevNPS = nps;
+		}
 
 		setOnScripts('botPlay', cpuControlled);
 		callOnScripts('onUpdatePost', [elapsed]);
@@ -2694,6 +2711,7 @@ class PlayState extends MusicBeatState
 
 		health -= subtract * healthLoss;
 		stats.miss();
+		hud.updateScore();
 
 		// play character anims
 		var char:Character = boyfriend;
@@ -2856,6 +2874,7 @@ class PlayState extends MusicBeatState
 			if(!note.noteSplashData.disabled && !note.isSustainNote) spawnNoteSplashOnNote(note);
 		}
 
+		npsArr.push(Conductor.songPosition);
 		hud.goodNoteHit(note);
 		stagesFunc(function(stage:BaseStage) stage.goodNoteHit(note));
 		var result:Dynamic = callOnHScript('goodNoteHit', [note]);

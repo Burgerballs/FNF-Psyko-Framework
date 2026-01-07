@@ -95,11 +95,11 @@ class Stats {
         data.rank = '?';
         if(hitPoints != 0)
         {
+            trace(accPoints / hitPoints);
             data.accuracy = Math.min(1, Math.max(0, accPoints / hitPoints));
-            trace(data.accuracy);
             data.rank = ratingStuff[ratingStuff.length-1][0];
             for (i in 0...ratingStuff.length-1)
-                if(data.accuracy <= ratingStuff[i][1])
+                if(data.accuracy >= ratingStuff[i][1])
                 {
                     data.rank = ratingStuff[i][0];
                     break;
