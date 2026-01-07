@@ -1,5 +1,6 @@
 package states;
 
+import backend.Stats;
 import backend.RetFlags;
 import backend.Highscore;
 import backend.StageData;
@@ -172,8 +173,7 @@ class PlayState extends MusicBeatState
 	public var health(default, set):Float = 1;
 	public var combo:Int = 0;
 
-	public var healthBar:Bar;
-	public var timeBar:Bar;
+	public var stats:Stats;
 	public var songPercent:Float = 0;
 
 	public var ratingsData:Array<Rating> = Rating.loadDefault();
@@ -205,7 +205,10 @@ class PlayState extends MusicBeatState
 	public var camOther:FlxCamera;
 	public var cameraSpeed:Float = 1;
 
-	public var songScore:Int = 0;
+	public var songScore(get,never):Int;
+	public function get_songScore() {
+		return stats.data.score;
+	}
 	public var songHits:Int = 0;
 	public var songMisses:Int = 0;
 	public var scoreTxt:FlxText;
@@ -296,6 +299,7 @@ class PlayState extends MusicBeatState
 		practiceMode = ClientPrefs.getGameplaySetting('practice');
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay');
 		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
+		stats = new Stats();
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = initPsychCamera();
@@ -634,24 +638,6 @@ class PlayState extends MusicBeatState
 		#end
 		return playbackRate;
 	}
-
-	// #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	// public function addTextToDebug(text:String, color:FlxColor) {
-	// 	var newText:psychlua.DebugLuaText = luaDebugGroup.recycle(psychlua.DebugLuaText);
-	// 	newText.text = text;
-	// 	newText.color = color;
-	// 	newText.disableTime = 6;
-	// 	newText.alpha = 1;
-	// 	newText.setPosition(10, 8 - newText.height);
-
-	// 	luaDebugGroup.forEachAlive(function(spr:psychlua.DebugLuaText) {
-	// 		spr.y += newText.height + 2;
-	// 	});
-	// 	luaDebugGroup.add(newText);
-
-	// 	Sys.println(text);
-	// }
-	// #end
 
 	public function reloadHealthBarColors() {
 		hud.reloadHealthBarColors();
@@ -1043,42 +1029,6 @@ class PlayState extends MusicBeatState
 	public dynamic function updateScoreText()
 	{
 		hud.updateScore();
-	}
-
-	public dynamic function fullComboFunction()
-	{
-		var sicks:Int = ratingsData[0].hits;
-		var goods:Int = ratingsData[1].hits;
-		var bads:Int = ratingsData[2].hits;
-		var shits:Int = ratingsData[3].hits;
-
-		ratingFC = "";
-		if(songMisses == 0)
-		{
-			if (bads > 0 || shits > 0) ratingFC = 'FC';
-			else if (goods > 0) ratingFC = 'GFC';
-			else if (sicks > 0) ratingFC = 'SFC';
-		}
-		else {
-			if (songMisses < 10) ratingFC = 'SDCB';
-			else ratingFC = 'Clear';
-		}
-	}
-
-	public function doScoreBop():Void {
-		// if(!ClientPrefs.data.scoreZoom)
-		// 	return;
-
-		// if(scoreTxtTween != null)
-		// 	scoreTxtTween.cancel();
-
-		// scoreTxt.scale.x = 1.075;
-		// scoreTxt.scale.y = 1.075;
-		// scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2, {
-		// 	onComplete: function(twn:FlxTween) {
-		// 		scoreTxtTween = null;
-		// 	}
-		// });
 	}
 
 	public function setSongTime(time:Float)
@@ -2372,10 +2322,9 @@ class PlayState extends MusicBeatState
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
-		var daRating:Rating = Conductor.judgeNote(ratingsData, noteDiff / playbackRate);
+		var daRating:Rating = stats.judgeNote(noteDiff / playbackRate, cpuControlled);
 
 		totalNotesHit += daRating.ratingMod;
-		note.ratingMod = daRating.ratingMod;
 		if(!note.ratingDisabled) daRating.hits++;
 		note.rating = daRating.name;
 		score = daRating.score;
@@ -2384,11 +2333,8 @@ class PlayState extends MusicBeatState
 			spawnNoteSplashOnNote(note);
 
 		if(!cpuControlled) {
-			songScore += score;
 			if(!note.ratingDisabled)
 			{
-				songHits++;
-				totalPlayed++;
 				RecalculateRating(false);
 			}
 		}
@@ -2747,10 +2693,7 @@ class PlayState extends MusicBeatState
 		combo = 0;
 
 		health -= subtract * healthLoss;
-		songScore -= 10;
-		if(!endingSong) songMisses++;
-		totalPlayed++;
-		RecalculateRating(true);
+		stats.miss();
 
 		// play character anims
 		var char:Character = boyfriend;
@@ -3185,40 +3128,17 @@ class PlayState extends MusicBeatState
 
 	public var ratingName:String = '?';
 	public var ratingPercent:Float;
-	public var ratingFC:String;
+	public var ratingFC:String = '';
 	public function RecalculateRating(badHit:Bool = false, scoreBop:Bool = true) {
-		setOnScripts('score', songScore);
-		setOnScripts('misses', songMisses);
-		setOnScripts('hits', songHits);
-		setOnScripts('combo', combo);
-
 		var ret:Dynamic = callOnScripts('onRecalculateRating', null, true);
 		if(ret != RetFlags.Function_Stop)
 		{
-			ratingName = '?';
-			if(totalPlayed != 0) //Prevent divide by 0
-			{
-				// Rating Percent
-				ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
-				//trace((totalNotesHit / totalPlayed) + ', Total: ' + totalPlayed + ', notes hit: ' + totalNotesHit);
-
-				// Rating Name
-				ratingName = ratingStuff[ratingStuff.length-1][0]; //Uses last string
-				if(ratingPercent < 1)
-					for (i in 0...ratingStuff.length-1)
-						if(ratingPercent < ratingStuff[i][1])
-						{
-							ratingName = ratingStuff[i][0];
-							break;
-						}
-			}
-			fullComboFunction();
+			stats.updateRatings();
+			ratingPercent = stats.data.accuracy;
+			ratingName = stats.data.rank;
+			ratingFC = stats.data.flag;
+			songMisses = stats.data.misses;
 		}
-		setOnScripts('rating', ratingPercent);
-		setOnScripts('ratingName', ratingName);
-		setOnScripts('ratingFC', ratingFC);
-		setOnScripts('totalPlayed', totalPlayed);
-		setOnScripts('totalNotesHit', totalNotesHit);
 		hud.updateScore(); // score will only update after rating is calculated, if it's a badHit, it shouldn't bounce
 	}
 

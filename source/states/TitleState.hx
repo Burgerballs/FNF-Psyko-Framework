@@ -1,5 +1,6 @@
 package states;
 
+import scripting.HScript;
 import backend.WeekData;
 
 import flixel.input.keyboard.FlxKey;

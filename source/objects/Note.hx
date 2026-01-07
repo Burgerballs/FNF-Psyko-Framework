@@ -52,7 +52,7 @@ class Note extends FlxSprite
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public var strumTime:Float = 0;
-	public var noteData:Int = 0;
+	public var noteData:cpp.Int8 = 0;
 
 	public var mustPress:Bool = false;
 	public var canBeHit:Bool = false;
@@ -79,7 +79,7 @@ class Note extends FlxSprite
 	public var noteType(default, set):String = null;
 
 	public var eventName:String = '';
-	public var eventLength:Int = 0;
+	public var eventLength:cpp.Int8 = 0;
 	public var eventVal1:String = '';
 	public var eventVal2:String = '';
 
@@ -93,7 +93,7 @@ class Note extends FlxSprite
 	public var lateHitMult:Float = 1;
 	public var lowPriority:Bool = false;
 
-	public static var SUSTAIN_SIZE:Int = 44;
+	public static var SUSTAIN_SIZE:cpp.Int8 = 44;
 	public static var swagWidth:Float = 160 * 0.7;
 	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
 	public static var defaultNoteSkin(default, never):String = 'noteSkins/NOTE_assets';

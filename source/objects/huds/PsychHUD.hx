@@ -63,9 +63,9 @@ class PsychHUD extends GenericHUD {
 
     public override function updateScore() {
         var str:String = Language.getPhrase('rating_$ratingName', ratingName);
-		if(game.totalPlayed != 0)
+		if(game.stats.hitPoints != 0)
 		{
-			var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 2);
+			var percent:Float = CoolUtil.floorDecimal(ratingPercent * 100, 3);
 			str += ' (${percent}%) - ' + Language.getPhrase(ratingFC);
 		}
 

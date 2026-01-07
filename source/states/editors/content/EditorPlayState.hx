@@ -1,5 +1,6 @@
 package states.editors.content;
 
+import backend.Stats;
 import backend.Song;
 import backend.Rating;
 
@@ -64,6 +65,7 @@ class EditorPlayState extends MusicBeatSubstate
 	var scoreTxt:FlxText;
 	var dataTxt:FlxText;
 	var guitarHeroSustains:Bool = false;
+	var stats:Stats;
 
 	var _noteList:Array<Note>;
 	public function new(noteList:Array<Note>, allVocals:Array<FlxSound>)
@@ -152,6 +154,8 @@ class EditorPlayState extends MusicBeatSubstate
 		#end
 		updateScore();
 		cachePopUpScore();
+		
+		stats = new Stats();
 
 		super.create();
 
@@ -538,9 +542,7 @@ class EditorPlayState extends MusicBeatSubstate
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
-		var daRating:Rating = Conductor.judgeNote(ratingsData, noteDiff / playbackRate);
-
-		note.ratingMod = daRating.ratingMod;
+		var daRating:Rating = stats.judgeNote(noteDiff / playbackRate);
 		if(!note.ratingDisabled) daRating.hits++;
 		note.rating = daRating.name;
 		score = daRating.score;
